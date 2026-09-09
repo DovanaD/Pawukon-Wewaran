@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ciclos pawukon</title>
+<title>Ciclos</title>
 <style>
   :root {
     --bg: #faf9f6;
@@ -14,6 +14,7 @@
     --text-faint: #b4b2a9;
     --border: rgba(0,0,0,0.08);
     --radius: 8px;
+    --accent: #2c2c2a;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -24,6 +25,7 @@
       --text-mut: #b4b2a9;
       --text-faint: #5f5e5a;
       --border: rgba(255,255,255,0.1);
+      --accent: #f1efe8;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,31 +33,98 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: 20px 16px;
+    padding: 16px 14px 40px;
     max-width: 640px;
     margin: 0 auto;
     line-height: 1.5;
   }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 18px;
+    background: var(--surface-alt);
+    padding: 4px;
+    border-radius: var(--radius);
+  }
+  .tab {
+    flex: 1;
+    padding: 8px 6px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text-mut);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .tab.active {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Anchor */
+  .anchor-block {
+    padding: 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+  .anchor-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-mut);
+    flex-wrap: wrap;
+  }
+  .anchor-row label { white-space: nowrap; }
+  .anchor-row input[type=date] {
+    background: var(--surface);
+    color: var(--text);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    flex: 1;
+    min-width: 140px;
+  }
+  .anchor-info {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 6px;
+  }
+
+  /* Pawukon header */
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     gap: 10px;
   }
   .day-info { flex: 1; min-width: 0; }
-  .day-num { font-size: 22px; font-weight: 500; }
-  .day-name { font-size: 13px; color: var(--text-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .day-num { font-size: 20px; font-weight: 500; }
+  .day-name { font-size: 12px; color: var(--text-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .controls { display: flex; gap: 6px; }
   button {
     background: var(--surface);
     color: var(--text);
     border: 0.5px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 6px;
     padding: 0;
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -65,56 +134,35 @@
   }
   button:hover { background: var(--surface-alt); }
   button:active { transform: scale(0.96); }
-  .action-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  .action-row input[type=range] {
-    flex: 1;
-    height: 32px;
-    accent-color: var(--text);
-  }
   .btn-text {
     width: auto;
     padding: 0 12px;
     height: 32px;
     font-size: 12px;
   }
-  .date-input {
-    background: var(--surface);
-    color: var(--text);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 6px 10px;
-    font-size: 12px;
-    font-family: inherit;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  .anchor-row {
+  .action-row {
     display: flex;
     gap: 8px;
+    margin-bottom: 18px;
     align-items: center;
-    margin-bottom: 20px;
-    font-size: 12px;
-    color: var(--text-mut);
-    flex-wrap: wrap;
   }
-  .anchor-row label { white-space: nowrap; }
-  .anchor-row input { flex: 1; min-width: 140px; }
-  .wheels { display: flex; flex-direction: column; gap: 14px; }
-  .cycle-row-wrap { }
+  .action-row input[type=range] {
+    flex: 1;
+    height: 32px;
+    accent-color: var(--accent);
+  }
+
+  /* Wheels (pawukon) */
+  .wheels { display: flex; flex-direction: column; gap: 12px; }
   .cycle-header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
-  .cycle-name { font-size: 13px; font-weight: 500; }
-  .cycle-len { font-size: 11px; color: var(--text-faint); }
-  .cycle-row { display: flex; gap: 4px; flex-wrap: nowrap; }
+  .cycle-name { font-size: 12px; font-weight: 500; }
+  .cycle-len { font-size: 10px; color: var(--text-faint); }
+  .cycle-row { display: flex; gap: 3px; flex-wrap: nowrap; }
   .cell {
     flex: 1;
     min-width: 0;
@@ -124,7 +172,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text-faint);
     background: var(--surface);
     transition: all 0.15s;
@@ -135,58 +183,163 @@
     color: white;
     border-color: transparent;
   }
+
+  /* Continuous cycles (annual & meta-annual) */
+  .cycle-block {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .cycle-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .cycle-title {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .cycle-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: right;
+  }
+  .cycle-bar {
+    position: relative;
+    height: 28px;
+    background: var(--surface-alt);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .cycle-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 14px;
+    opacity: 0.18;
+    transition: width 0.3s;
+  }
+  .cycle-bar-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: left 0.3s;
+  }
+  .cycle-bar-ticks {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+  .cycle-tick {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 10px;
+    background: var(--text-faint);
+    opacity: 0.4;
+  }
+  .cycle-tick-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--text-mut);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .cycle-status {
+    font-size: 11px;
+    color: var(--text-mut);
+    display: flex;
+    justify-content: space-between;
+  }
+  .cycle-status strong { color: var(--text); font-weight: 500; }
+
   .footer {
-    margin-top: 20px;
+    margin-top: 24px;
     padding: 12px;
     background: var(--surface-alt);
     border-radius: var(--radius);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-mut);
-    line-height: 1.6;
+    line-height: 1.5;
   }
   .footer strong { color: var(--text); font-weight: 500; }
   .status {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-faint);
-    margin-top: 8px;
+    margin-top: 6px;
     text-align: center;
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="day-info">
-    <div class="day-num" id="day-num">Dia 1</div>
-    <div class="day-name" id="day-name"></div>
+<div class="anchor-block">
+  <div class="anchor-row">
+    <label for="anchor">Dia 1 pessoal =</label>
+    <input type="date" id="anchor">
   </div>
-  <div class="controls">
-    <button id="prev" aria-label="anterior">‹</button>
-    <button id="play" aria-label="play"><span id="play-icon">▶</span></button>
-    <button id="next" aria-label="próximo">›</button>
+  <div class="anchor-info">Serve para pawukon, ciclos gregorianos plurianuais e 1008 lunações. Ciclos astronômicos são independentes.</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-panel="pawukon">Pawukon</button>
+  <button class="tab" data-panel="anuais">Anuais</button>
+  <button class="tab" data-panel="alem">Além-anuais</button>
+</div>
+
+<!-- PANEL PAWUKON -->
+<div class="panel active" id="panel-pawukon">
+  <div class="header">
+    <div class="day-info">
+      <div class="day-num" id="pw-day-num">Dia 1</div>
+      <div class="day-name" id="pw-day-name"></div>
+    </div>
+    <div class="controls">
+      <button id="pw-prev" aria-label="anterior">‹</button>
+      <button id="pw-play" aria-label="play"><span id="pw-play-icon">▶</span></button>
+      <button id="pw-next" aria-label="próximo">›</button>
+    </div>
+  </div>
+  <div class="action-row">
+    <input type="range" id="pw-slider" min="1" max="27720" value="1" step="1">
+    <button id="pw-today" class="btn-text">hoje</button>
+  </div>
+  <div class="wheels" id="pw-wheels"></div>
+  <div class="footer">
+    <div><strong>MMC:</strong> <span id="pw-lcm"></span> dias (≈ <span id="pw-years"></span> anos). Ciclos 1–10 são o wewaran balinês; ciclo de 11 adicional.</div>
+    <div class="status" id="status">Estado salvo automaticamente</div>
   </div>
 </div>
 
-<div class="action-row">
-  <input type="range" id="slider" min="1" max="27720" value="1" step="1">
-  <button id="today" class="btn-text">hoje</button>
+<!-- PANEL ANUAIS -->
+<div class="panel" id="panel-anuais">
+  <div id="anuais-list"></div>
 </div>
 
-<div class="anchor-row">
-  <label for="anchor">Dia 1 =</label>
-  <input type="date" id="anchor" class="date-input" style="margin-bottom: 0;">
-</div>
-
-<div class="wheels" id="wheels"></div>
-
-<div class="footer">
-  <div><strong>MMC dos ciclos:</strong> <span id="lcm"></span> dias (≈ <span id="years"></span> anos)</div>
-  <div style="margin-top: 4px;">Ciclos 1–10 são o wewaran balinês. O ciclo de 11 é adicional.</div>
-  <div class="status" id="status">Estado salvo automaticamente</div>
+<!-- PANEL ALÉM-ANUAIS -->
+<div class="panel" id="panel-alem">
+  <div id="alem-list"></div>
 </div>
 
 <script>
 (function() {
+
+  // ============ PAWUKON ============
   const cycles = [
     { n: 1,  name: 'ekawara',   names: ['luang'] },
     { n: 2,  name: 'dwiwara',   names: ['menga','pepet'] },
@@ -200,25 +353,16 @@
     { n: 10, name: 'dasawara',  names: ['pandita','pati','suka','duka','sri','manuh','manusa','raja','dewa','raksasa'] },
     { n: 11, name: 'ciclo-11',  names: Array.from({length:11}, (_,i) => 'd'+(i+1)) }
   ];
-
   const colors = ['#888780','#378ADD','#1D9E75','#7F77DD','#D85A30','#D4537E','#EF9F27','#639922','#E24B4A','#378ADD','#7F77DD'];
-  const STORAGE_KEY = 'pawukon-ciclos-v1';
+  const STORAGE_KEY = 'ciclos-app-v2';
 
   function gcd(a,b){ return b ? gcd(b, a%b) : a; }
   function lcm(a,b){ return a*b/gcd(a,b); }
   const totalLcm = cycles.reduce((a,c) => lcm(a, c.n), 1);
 
-  const wheelsEl = document.getElementById('wheels');
-  const dayNumEl = document.getElementById('day-num');
-  const dayNameEl = document.getElementById('day-name');
-  const slider = document.getElementById('slider');
   const anchorEl = document.getElementById('anchor');
   const statusEl = document.getElementById('status');
-  document.getElementById('lcm').textContent = totalLcm.toLocaleString('pt-BR');
-  document.getElementById('years').textContent = (totalLcm / 365.25).toFixed(1);
-  slider.max = totalLcm;
 
-  // Load state
   let state = { anchorDate: null };
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -229,15 +373,20 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       statusEl.textContent = 'Salvo · ' + new Date().toLocaleTimeString('pt-BR');
-    } catch(e) {
-      statusEl.textContent = 'Erro ao salvar';
-    }
+    } catch(e) { statusEl.textContent = 'Erro ao salvar'; }
   }
 
-  // Build cycle rows
+  // ============ PAWUKON RENDER ============
+  const pwWheels = document.getElementById('pw-wheels');
+  const pwDayNum = document.getElementById('pw-day-num');
+  const pwDayName = document.getElementById('pw-day-name');
+  const pwSlider = document.getElementById('pw-slider');
+  document.getElementById('pw-lcm').textContent = totalLcm.toLocaleString('pt-BR');
+  document.getElementById('pw-years').textContent = (totalLcm / 365.25).toFixed(1);
+  pwSlider.max = totalLcm;
+
   cycles.forEach((cyc, idx) => {
     const wrap = document.createElement('div');
-    wrap.className = 'cycle-row-wrap';
     wrap.innerHTML = `
       <div class="cycle-header">
         <span class="cycle-name">${cyc.name}</span>
@@ -245,7 +394,7 @@
       </div>
       <div class="cycle-row" data-cycle="${idx}"></div>
     `;
-    wheelsEl.appendChild(wrap);
+    pwWheels.appendChild(wrap);
     const row = wrap.querySelector('.cycle-row');
     for (let i = 0; i < cyc.n; i++) {
       const cell = document.createElement('div');
@@ -260,28 +409,20 @@
     const anchor = new Date(state.anchorDate + 'T00:00:00');
     const today = new Date();
     today.setHours(0,0,0,0);
-    const diffMs = today - anchor;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays;
+    return Math.floor((today - anchor) / 86400000) + 1;
   }
 
-  function computeToday() {
-    const d = daysSinceAnchor();
-    return ((d - 1) % totalLcm + totalLcm) % totalLcm + 1;
-  }
-
-  function update(day) {
+  function pwUpdate(day) {
     const d = ((day - 1) % totalLcm + totalLcm) % totalLcm;
-    dayNumEl.textContent = 'Dia ' + day.toLocaleString('pt-BR');
+    pwDayNum.textContent = 'Dia ' + day.toLocaleString('pt-BR');
     const names = [];
-    document.querySelectorAll('.cycle-row').forEach((row, idx) => {
+    document.querySelectorAll('#pw-wheels .cycle-row').forEach((row, idx) => {
       const cyc = cycles[idx];
       const pos = d % cyc.n;
-      const color = colors[idx];
       row.querySelectorAll('.cell').forEach((cell, i) => {
         if (i === pos) {
           cell.classList.add('active');
-          cell.style.background = color;
+          cell.style.background = colors[idx];
         } else {
           cell.classList.remove('active');
           cell.style.background = '';
@@ -289,58 +430,539 @@
       });
       if (cyc.n > 1) names.push(cyc.names[pos]);
     });
-    dayNameEl.textContent = names.slice(0, 5).join(' · ');
+    pwDayName.textContent = names.slice(0, 5).join(' · ');
   }
 
-  let current = 1;
-  function setDay(d, save = false) {
-    current = Math.max(1, Math.min(totalLcm, d));
-    slider.value = current;
-    update(current);
+  let pwCurrent = 1;
+  function pwSetDay(d) {
+    pwCurrent = Math.max(1, Math.min(totalLcm, d));
+    pwSlider.value = pwCurrent;
+    pwUpdate(pwCurrent);
   }
-
-  function goToToday() {
+  function pwGoToToday() {
     if (!state.anchorDate) {
-      // Default anchor to today
-      const today = new Date();
-      state.anchorDate = today.toISOString().slice(0,10);
+      state.anchorDate = new Date().toISOString().slice(0,10);
       anchorEl.value = state.anchorDate;
       saveState();
     }
-    setDay(computeToday());
+    pwSetDay(((daysSinceAnchor() - 1) % totalLcm + totalLcm) % totalLcm + 1);
   }
+  pwSlider.addEventListener('input', e => pwSetDay(parseInt(e.target.value)));
+  document.getElementById('pw-prev').addEventListener('click', () => pwSetDay(pwCurrent - 1));
+  document.getElementById('pw-next').addEventListener('click', () => pwSetDay(pwCurrent + 1));
+  document.getElementById('pw-today').addEventListener('click', pwGoToToday);
+  let pwPlaying = null;
+  document.getElementById('pw-play').addEventListener('click', () => {
+    const icon = document.getElementById('pw-play-icon');
+    if (pwPlaying) { clearInterval(pwPlaying); pwPlaying = null; icon.textContent = '▶'; }
+    else { pwPlaying = setInterval(() => pwSetDay(pwCurrent + 1), 350); icon.textContent = '⏸'; }
+  });
 
-  slider.addEventListener('input', e => setDay(parseInt(e.target.value)));
-  document.getElementById('prev').addEventListener('click', () => setDay(current - 1));
-  document.getElementById('next').addEventListener('click', () => setDay(current + 1));
-  document.getElementById('today').addEventListener('click', goToToday);
-
+  // ============ ANCHOR ============
   anchorEl.addEventListener('change', e => {
     state.anchorDate = e.target.value || null;
     saveState();
-    if (state.anchorDate) setDay(computeToday());
-  });
-
-  let playing = null;
-  document.getElementById('play').addEventListener('click', () => {
-    const icon = document.getElementById('play-icon');
-    if (playing) {
-      clearInterval(playing);
-      playing = null;
-      icon.textContent = '▶';
-    } else {
-      playing = setInterval(() => setDay(current + 1), 350);
-      icon.textContent = '⏸';
+    if (state.anchorDate) {
+      pwSetDay(((daysSinceAnchor() - 1) % totalLcm + totalLcm) % totalLcm + 1);
+      renderAnuais();
+      renderAlem();
     }
   });
 
-  // Init
+  // ============ TABS ============
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+      if (tab.dataset.panel === 'anuais') renderAnuais();
+      if (tab.dataset.panel === 'alem') renderAlem();
+    });
+  });
+
+  // ============ ASTRONOMICAL CONSTANTS ============
+  // J2000.0 = 2000-01-01 12:00 TT ≈ 2000-01-01 11:58:56 UT
+  const J2000 = Date.UTC(2000, 0, 1, 12, 0, 0);
+  // Known new moon: 2000-01-06 18:14 UT
+  const NEW_MOON_REF = Date.UTC(2000, 0, 6, 18, 14, 0);
+  const SYNODIC_MONTH = 29.530588853; // days
+  const TROPICAL_YEAR = 365.242190;
+  const SIDEREAL_YEAR = 365.25636;
+  // Planetary orbital periods (sidereal, days)
+  const MERCURY = 87.9691;
+  const VENUS = 224.701;
+  const MARS = 686.980;
+  const JUPITER = 4332.59;    // ~11.862 years
+  const SATURN = 10759.22;    // ~29.457 years
+  const URANUS = 30688.5;     // ~84.02 years
+  // Cycles
+  const SAROS = 6585.3211;    // days (18y 11d 8h)
+  const METONIC = 6939.688;   // 19 tropical years ≈ 235 synodic months
+  const SCHWABE = 11.0 * TROPICAL_YEAR; // ~11-year sunspot cycle
+  const LUNATIONS_1008 = 1008 * SYNODIC_MONTH;
+
+  function daysBetween(d1, d2) {
+    return (d2 - d1) / 86400000;
+  }
+
+  function nowUTC() {
+    // Use local midnight in UTC form for daily granularity where appropriate
+    const n = new Date();
+    return n.getTime();
+  }
+
+  // Continuous cycle: returns { phase: 0..1, dayInCycle, cycleLength }
+  function continuousPhase(refMs, periodDays, nowMs) {
+    const elapsed = daysBetween(refMs, nowMs);
+    const cyclesDone = elapsed / periodDays;
+    const phase = ((cyclesDone % 1) + 1) % 1;
+    return { phase, dayInCycle: phase * periodDays, cycleLength: periodDays };
+  }
+
+  // Lunar phase name
+  function lunarPhaseName(phase) {
+    // phase 0 = nova, 0.25 = crescente, 0.5 = cheia, 0.75 = minguante
+    const p = phase;
+    if (p < 0.03 || p > 0.97) return 'nova';
+    if (Math.abs(p - 0.25) < 0.03) return 'quarto crescente';
+    if (Math.abs(p - 0.5) < 0.03) return 'cheia';
+    if (Math.abs(p - 0.75) < 0.03) return 'quarto minguante';
+    if (p < 0.25) return 'crescente côncava';
+    if (p < 0.5) return 'crescente gibosa';
+    if (p < 0.75) return 'minguante gibosa';
+    return 'minguante côncava';
+  }
+
+  // Solstice/equinox: approximate dates for a given year (UT)
+  // Using Meeus simplified approximation
+  function getSolarPoints(year) {
+    // Rough dates (day of year, UT); good to ~1 day
+    return [
+      { name: 'equinócio março', date: new Date(Date.UTC(year, 2, 20, 12, 0)) },
+      { name: 'solstício junho',  date: new Date(Date.UTC(year, 5, 21, 6, 0)) },
+      { name: 'equinócio setembro', date: new Date(Date.UTC(year, 8, 22, 22, 0)) },
+      { name: 'solstício dezembro', date: new Date(Date.UTC(year, 11, 21, 18, 0)) }
+    ];
+  }
+
+  // Which solar quarter are we in, and phase within it
+  function solarSeasonPhase(nowMs) {
+    const now = new Date(nowMs);
+    const y = now.getUTCFullYear();
+    const pts = [...getSolarPoints(y - 1), ...getSolarPoints(y), ...getSolarPoints(y + 1)];
+    // Find last point before now
+    let last = pts[0], next = pts[1];
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (pts[i].date.getTime() <= nowMs && pts[i+1].date.getTime() > nowMs) {
+        last = pts[i]; next = pts[i+1]; break;
+      }
+    }
+    const total = next.date.getTime() - last.date.getTime();
+    const elapsed = nowMs - last.date.getTime();
+    return {
+      phase: elapsed / total,
+      last: last.name,
+      next: next.name,
+      daysToNext: (next.date.getTime() - nowMs) / 86400000
+    };
+  }
+
+  // Day of gregorian year
+  function dayOfYear(date) {
+    const start = new Date(Date.UTC(date.getUTCFullYear(), 0, 0));
+    const diff = date.getTime() - start.getTime();
+    return Math.floor(diff / 86400000);
+  }
+  function daysInYear(y) {
+    return ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+  }
+
+  // Day of gregorian month
+  function dayOfMonth(date) {
+    return date.getUTCDate();
+  }
+  function daysInMonth(date) {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+  }
+
+  // Plurianual gregorian based on anchor
+  function plurianualPhase(anchorDate, nSpanYears, nowMs) {
+    if (!anchorDate) return null;
+    const anchor = new Date(anchorDate + 'T00:00:00Z');
+    const anchorMs = anchor.getTime();
+    const elapsedYears = (nowMs - anchorMs) / (86400000 * TROPICAL_YEAR);
+    const cyclesDone = elapsedYears / nSpanYears;
+    const phase = ((cyclesDone % 1) + 1) % 1;
+    return { phase, yearsInCycle: phase * nSpanYears, cycleLengthYears: nSpanYears };
+  }
+
+  // ============ RENDER HELPERS ============
+  function makeCycleBlock({ title, sub, phase, marker, ticks, statusLeft, statusRight, color }) {
+    const div = document.createElement('div');
+    div.className = 'cycle-block';
+    const pct = (phase * 100).toFixed(1);
+    let tickHtml = '';
+    if (ticks) {
+      tickHtml = ticks.map(t => `
+        <div class="cycle-tick" style="left: ${(t.at * 100).toFixed(2)}%;">
+          ${t.label ? `<div class="cycle-tick-label">${t.label}</div>` : ''}
+        </div>
+      `).join('');
+    }
+    div.innerHTML = `
+      <div class="cycle-block-header">
+        <div class="cycle-title">${title}</div>
+        <div class="cycle-sub">${sub}</div>
+      </div>
+      <div class="cycle-bar">
+        <div class="cycle-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+        <div class="cycle-bar-ticks">${tickHtml}</div>
+        <div class="cycle-bar-marker" style="left: ${pct}%; background: ${color};"></div>
+      </div>
+      <div class="cycle-status">
+        <span>${statusLeft}</span>
+        <span>${statusRight}</span>
+      </div>
+    `;
+    return div;
+  }
+
+  // ============ RENDER ANUAIS ============
+  function renderAnuais() {
+    const container = document.getElementById('anuais-list');
+    container.innerHTML = '';
+    const now = nowUTC();
+    const nowDate = new Date(now);
+
+    // 1. LUNAÇÃO
+    {
+      const p = continuousPhase(NEW_MOON_REF, SYNODIC_MONTH, now);
+      const daysIn = p.dayInCycle;
+      const daysLeft = SYNODIC_MONTH - daysIn;
+      container.appendChild(makeCycleBlock({
+        title: 'Lunação',
+        sub: `${SYNODIC_MONTH.toFixed(3)} dias`,
+        phase: p.phase,
+        color: '#7F77DD',
+        ticks: [
+          { at: 0, label: 'nova' },
+          { at: 0.25, label: 'crescente' },
+          { at: 0.5, label: 'cheia' },
+          { at: 0.75, label: 'minguante' },
+          { at: 1 }
+        ],
+        statusLeft: `<strong>${lunarPhaseName(p.phase)}</strong> · dia ${daysIn.toFixed(1)} da lunação`,
+        statusRight: `próxima nova em ${daysLeft.toFixed(1)}d`
+      }));
+    }
+
+    // 2. MÊS SOLAR GREGORIANO
+    {
+      const dm = dayOfMonth(nowDate);
+      const total = daysInMonth(nowDate);
+      const phase = (dm - 1) / total;
+      const monthNames = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      container.appendChild(makeCycleBlock({
+        title: 'Mês gregoriano',
+        sub: `${total} dias · ${monthNames[nowDate.getUTCMonth()]}`,
+        phase,
+        color: '#378ADD',
+        ticks: [{at:0},{at:0.25},{at:0.5},{at:0.75},{at:1}],
+        statusLeft: `<strong>dia ${dm}</strong> de ${total}`,
+        statusRight: `${total - dm}d para próximo mês`
+      }));
+    }
+
+    // 3. MÊS LUNAR (mesmo que lunação mas rotulado)
+    {
+      const p = continuousPhase(NEW_MOON_REF, SYNODIC_MONTH, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Mês lunar sinódico',
+        sub: `29.53d`,
+        phase: p.phase,
+        color: '#D4537E',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>dia ${p.dayInCycle.toFixed(1)}</strong> do mês lunar`,
+        statusRight: `${(SYNODIC_MONTH - p.dayInCycle).toFixed(1)}d restantes`
+      }));
+    }
+
+    // 4. ANO DE MERCÚRIO
+    {
+      const p = continuousPhase(J2000, MERCURY, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Mercúrio',
+        sub: `${MERCURY.toFixed(2)} dias`,
+        phase: p.phase,
+        color: '#EF9F27',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>dia ${p.dayInCycle.toFixed(1)}</strong> / ${MERCURY.toFixed(1)}`,
+        statusRight: `${(100 * p.phase).toFixed(1)}% completo`
+      }));
+    }
+
+    // 5. SOLSTÍCIOS/EQUINÓCIOS (posição no ciclo tropical)
+    {
+      const s = solarSeasonPhase(now);
+      container.appendChild(makeCycleBlock({
+        title: 'Estação tropical',
+        sub: `${s.last} → ${s.next}`,
+        phase: s.phase,
+        color: '#EF9F27',
+        ticks: [{at:0, label: s.last.split(' ')[0]}, {at:1, label: s.next.split(' ')[0]}],
+        statusLeft: `<strong>${(s.phase * 100).toFixed(1)}%</strong> desde ${s.last}`,
+        statusRight: `${s.daysToNext.toFixed(0)}d para ${s.next}`
+      }));
+    }
+
+    // 6. ANO DE VÊNUS
+    {
+      const p = continuousPhase(J2000, VENUS, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Vênus',
+        sub: `${VENUS.toFixed(2)} dias`,
+        phase: p.phase,
+        color: '#D85A30',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>dia ${p.dayInCycle.toFixed(1)}</strong> / ${VENUS.toFixed(1)}`,
+        statusRight: `${(100 * p.phase).toFixed(1)}% completo`
+      }));
+    }
+
+    // 7. DIA DO ANO GREGORIANO
+    {
+      const doy = dayOfYear(nowDate);
+      const total = daysInYear(nowDate.getUTCFullYear());
+      const phase = (doy - 1) / total;
+      container.appendChild(makeCycleBlock({
+        title: 'Ano gregoriano',
+        sub: `${total} dias · ${nowDate.getUTCFullYear()}`,
+        phase,
+        color: '#1D9E75',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>dia ${doy}</strong> de ${total}`,
+        statusRight: `${total - doy}d para virar ano`
+      }));
+    }
+  }
+
+  // ============ RENDER ALÉM-ANUAIS ============
+  function renderAlem() {
+    const container = document.getElementById('alem-list');
+    container.innerHTML = '';
+    const now = nowUTC();
+
+    function needAnchor(title) {
+      const div = document.createElement('div');
+      div.className = 'cycle-block';
+      div.innerHTML = `
+        <div class="cycle-block-header">
+          <div class="cycle-title">${title}</div>
+          <div class="cycle-sub" style="color:#D85A30;">defina Dia 1 pessoal</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-mut);">Este ciclo é ancorado no seu Dia 1 pessoal (topo).</div>
+      `;
+      return div;
+    }
+
+    // 1. BI-ANUAL GREGORIANO
+    if (state.anchorDate) {
+      const p = plurianualPhase(state.anchorDate, 2, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Bi-anual gregoriano',
+        sub: '2 anos',
+        phase: p.phase,
+        color: '#888780',
+        ticks: [{at:0.5, label:'metade'}],
+        statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 2`,
+        statusRight: `${((1-p.phase)*2).toFixed(2)}a restantes`
+      }));
+    } else container.appendChild(needAnchor('Bi-anual gregoriano'));
+
+    // 2. ANO DE MARTE
+    {
+      const p = continuousPhase(J2000, MARS, now);
+      const years = MARS / TROPICAL_YEAR;
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Marte',
+        sub: `${MARS.toFixed(1)}d (${years.toFixed(3)}a)`,
+        phase: p.phase,
+        color: '#E24B4A',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>dia ${p.dayInCycle.toFixed(0)}</strong> / ${MARS.toFixed(0)}`,
+        statusRight: `${(100 * p.phase).toFixed(1)}% completo`
+      }));
+    }
+
+    // 3. TRI-ANUAL GREGORIANO
+    if (state.anchorDate) {
+      const p = plurianualPhase(state.anchorDate, 3, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Tri-anual gregoriano',
+        sub: '3 anos',
+        phase: p.phase,
+        color: '#888780',
+        ticks: [{at:1/3},{at:2/3}],
+        statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 3`,
+        statusRight: `${((1-p.phase)*3).toFixed(2)}a restantes`
+      }));
+    } else container.appendChild(needAnchor('Tri-anual gregoriano'));
+
+    // 4. PENTA-ANUAL
+    if (state.anchorDate) {
+      const p = plurianualPhase(state.anchorDate, 5, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Penta-anual gregoriano',
+        sub: '5 anos',
+        phase: p.phase,
+        color: '#888780',
+        ticks: [{at:0.2},{at:0.4},{at:0.6},{at:0.8}],
+        statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 5`,
+        statusRight: `${((1-p.phase)*5).toFixed(2)}a restantes`
+      }));
+    } else container.appendChild(needAnchor('Penta-anual gregoriano'));
+
+    // 5. HEXA-ANUAL
+    if (state.anchorDate) {
+      const p = plurianualPhase(state.anchorDate, 6, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Hexa-anual gregoriano',
+        sub: '6 anos',
+        phase: p.phase,
+        color: '#888780',
+        ticks: [{at:1/6},{at:2/6},{at:3/6},{at:4/6},{at:5/6}],
+        statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 6`,
+        statusRight: `${((1-p.phase)*6).toFixed(2)}a restantes`
+      }));
+    } else container.appendChild(needAnchor('Hexa-anual gregoriano'));
+
+    // 6. SCHWABE (manchas solares, ~11 anos)
+    {
+      // Reference: solar cycle 23 minimum ≈ 1996-08-01
+      const SCHWABE_REF = Date.UTC(1996, 7, 1);
+      const p = continuousPhase(SCHWABE_REF, SCHWABE, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Ciclo de Schwabe (manchas solares)',
+        sub: `~11 anos (${SCHWABE.toFixed(0)}d)`,
+        phase: p.phase,
+        color: '#EF9F27',
+        ticks: [{at:0.5, label:'máx.'}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / 11`,
+        statusRight: `próx. mín. em ${((SCHWABE - p.dayInCycle)/TROPICAL_YEAR).toFixed(2)}a`
+      }));
+    }
+
+    // 7. ANO DE JÚPITER
+    {
+      const p = continuousPhase(J2000, JUPITER, now);
+      const years = JUPITER / TROPICAL_YEAR;
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Júpiter',
+        sub: `${years.toFixed(3)} anos`,
+        phase: p.phase,
+        color: '#D85A30',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / ${years.toFixed(1)}`,
+        statusRight: `${((JUPITER - p.dayInCycle)/TROPICAL_YEAR).toFixed(2)}a restantes`
+      }));
+    }
+
+    // 8. CICLO DE SAROS
+    {
+      // Reference: a known central saros eclipse: 1999-08-11 solar eclipse (Saros 145)
+      const SAROS_REF = Date.UTC(1999, 7, 11, 11, 3);
+      const p = continuousPhase(SAROS_REF, SAROS, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Ciclo de Saros',
+        sub: `18a 11d 8h (${SAROS.toFixed(1)}d)`,
+        phase: p.phase,
+        color: '#7F77DD',
+        ticks: [{at:0.5}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / 18.03`,
+        statusRight: `próx. repetição em ${((SAROS - p.dayInCycle)/TROPICAL_YEAR).toFixed(2)}a`
+      }));
+    }
+
+    // 9. CICLO METÔNICO
+    {
+      // Reference: any Jan 1 works; use 2000-01-01
+      const METONIC_REF = Date.UTC(2000, 0, 1);
+      const p = continuousPhase(METONIC_REF, METONIC, now);
+      container.appendChild(makeCycleBlock({
+        title: 'Ciclo metônico',
+        sub: `19 anos ≈ 235 lunações`,
+        phase: p.phase,
+        color: '#378ADD',
+        ticks: [{at:0.5}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / 19`,
+        statusRight: `próx. realinhamento em ${((METONIC - p.dayInCycle)/TROPICAL_YEAR).toFixed(2)}a`
+      }));
+    }
+
+    // 10. ANO DE SATURNO
+    {
+      const p = continuousPhase(J2000, SATURN, now);
+      const years = SATURN / TROPICAL_YEAR;
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Saturno',
+        sub: `${years.toFixed(3)} anos`,
+        phase: p.phase,
+        color: '#639922',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / ${years.toFixed(1)}`,
+        statusRight: `${((SATURN - p.dayInCycle)/TROPICAL_YEAR).toFixed(1)}a restantes`
+      }));
+    }
+
+    // 11. 1008 LUNAÇÕES
+    if (state.anchorDate) {
+      const anchorMs = new Date(state.anchorDate + 'T00:00:00Z').getTime();
+      const p = continuousPhase(anchorMs, LUNATIONS_1008, now);
+      const years = LUNATIONS_1008 / TROPICAL_YEAR;
+      container.appendChild(makeCycleBlock({
+        title: '1008 lunações',
+        sub: `${LUNATIONS_1008.toFixed(0)}d (${years.toFixed(2)}a)`,
+        phase: p.phase,
+        color: '#D4537E',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>lunação ${(p.phase * 1008).toFixed(1)}</strong> / 1008`,
+        statusRight: `${((1-p.phase)*years).toFixed(2)}a restantes`
+      }));
+    } else container.appendChild(needAnchor('1008 lunações'));
+
+    // 12. ANO DE URANO
+    {
+      const p = continuousPhase(J2000, URANUS, now);
+      const years = URANUS / TROPICAL_YEAR;
+      container.appendChild(makeCycleBlock({
+        title: 'Ano de Urano',
+        sub: `${years.toFixed(2)} anos`,
+        phase: p.phase,
+        color: '#7F77DD',
+        ticks: [{at:0.25},{at:0.5},{at:0.75}],
+        statusLeft: `<strong>ano ${(p.dayInCycle/TROPICAL_YEAR).toFixed(2)}</strong> / ${years.toFixed(1)}`,
+        statusRight: `${((URANUS - p.dayInCycle)/TROPICAL_YEAR).toFixed(1)}a restantes`
+      }));
+    }
+  }
+
+  // ============ INIT ============
   if (state.anchorDate) {
     anchorEl.value = state.anchorDate;
-    setDay(computeToday());
+    pwSetDay(((daysSinceAnchor() - 1) % totalLcm + totalLcm) % totalLcm + 1);
   } else {
-    setDay(1);
+    pwSetDay(1);
   }
+  renderAnuais();
+  renderAlem();
+
+  // Auto-refresh continuous cycles every minute
+  setInterval(() => {
+    if (document.getElementById('panel-anuais').classList.contains('active')) renderAnuais();
+    if (document.getElementById('panel-alem').classList.contains('active')) renderAlem();
+  }, 60000);
+
 })();
 </script>
 
