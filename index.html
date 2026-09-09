@@ -284,6 +284,118 @@
     margin-top: 6px;
     text-align: center;
   }
+
+  /* Clickable cycle blocks */
+  .cycle-block, .cycle-row-wrap {
+    cursor: pointer;
+    position: relative;
+  }
+  .cycle-block:hover { border-color: var(--text-mut); }
+  .note-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #EF9F27;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+    padding: 0;
+  }
+  .modal-backdrop.open { display: flex; }
+  @media (min-width: 500px) {
+    .modal-backdrop { align-items: center; padding: 20px; }
+  }
+  .modal {
+    background: var(--bg);
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  }
+  @media (min-width: 500px) {
+    .modal { border-radius: 12px; }
+  }
+  .modal-header {
+    padding: 16px 16px 12px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-title {
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+  }
+  .modal-sub {
+    font-size: 11px;
+    color: var(--text-mut);
+    margin-top: 2px;
+  }
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    background: var(--surface-alt);
+    border: none;
+  }
+  .modal-body {
+    padding: 12px 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 12px;
+    background: var(--surface);
+    color: var(--text);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  .modal textarea:focus {
+    outline: none;
+    border-color: var(--text-mut);
+  }
+  .modal-footer {
+    padding: 10px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-top: 0.5px solid var(--border);
+  }
+  .modal-status {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .modal-clear {
+    font-size: 11px;
+    padding: 6px 10px;
+    height: auto;
+    width: auto;
+    background: transparent;
+    color: var(--text-mut);
+  }
 </style>
 </head>
 <body>
@@ -336,6 +448,26 @@
   <div id="alem-list"></div>
 </div>
 
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="fechar">×</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="modal-textarea" placeholder="Notas, rotinas, práticas vinculadas a este ciclo…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-status" id="modal-status"></span>
+      <button class="modal-clear" id="modal-clear">limpar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function() {
 
@@ -363,11 +495,17 @@
   const anchorEl = document.getElementById('anchor');
   const statusEl = document.getElementById('status');
 
-  let state = { anchorDate: null };
+  let state = { anchorDate: null, notes: {} };
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) state = JSON.parse(saved);
+    if (saved) {
+      state = JSON.parse(saved);
+      if (!state.notes) state.notes = {};
+    }
   } catch(e) {}
+
+  function hasNote(id) { return state.notes[id] && state.notes[id].trim().length > 0; }
+  function noteIndicator(id) { return hasNote(id) ? '<span class="note-dot" title="tem nota"></span>' : ''; }
 
   function saveState() {
     try {
@@ -387,9 +525,14 @@
 
   cycles.forEach((cyc, idx) => {
     const wrap = document.createElement('div');
+    wrap.className = 'cycle-row-wrap';
+    const noteId = 'pw-' + cyc.name;
+    wrap.dataset.noteId = noteId;
+    wrap.dataset.noteTitle = cyc.name;
+    wrap.dataset.noteSub = `Pawukon · ${cyc.n} dias`;
     wrap.innerHTML = `
       <div class="cycle-header">
-        <span class="cycle-name">${cyc.name}</span>
+        <span class="cycle-name">${cyc.name}<span class="note-slot"></span></span>
         <span class="cycle-len">${cyc.n} dias</span>
       </div>
       <div class="cycle-row" data-cycle="${idx}"></div>
@@ -402,7 +545,19 @@
       cell.textContent = i + 1;
       row.appendChild(cell);
     }
+    wrap.addEventListener('click', (e) => {
+      if (e.target.closest('.cycle-row')) return; // don't open when clicking the balls themselves
+      openNoteModal(noteId, cyc.name, `Pawukon · ${cyc.n} dias`);
+    });
   });
+
+  function refreshNoteIndicators() {
+    document.querySelectorAll('[data-note-id]').forEach(el => {
+      const id = el.dataset.noteId;
+      const slot = el.querySelector('.note-slot, .cycle-title .note-slot');
+      if (slot) slot.innerHTML = hasNote(id) ? '<span class="note-dot"></span>' : '';
+    });
+  }
 
   function daysSinceAnchor() {
     if (!state.anchorDate) return 1;
@@ -598,9 +753,14 @@
   }
 
   // ============ RENDER HELPERS ============
-  function makeCycleBlock({ title, sub, phase, marker, ticks, statusLeft, statusRight, color }) {
+  function makeCycleBlock({ id, title, sub, phase, marker, ticks, statusLeft, statusRight, color }) {
     const div = document.createElement('div');
     div.className = 'cycle-block';
+    if (id) {
+      div.dataset.noteId = id;
+      div.dataset.noteTitle = title;
+      div.dataset.noteSub = sub;
+    }
     const pct = (phase * 100).toFixed(1);
     let tickHtml = '';
     if (ticks) {
@@ -610,9 +770,10 @@
         </div>
       `).join('');
     }
+    const dot = id && hasNote(id) ? '<span class="note-dot"></span>' : '<span class="note-slot"></span>';
     div.innerHTML = `
       <div class="cycle-block-header">
-        <div class="cycle-title">${title}</div>
+        <div class="cycle-title">${title}${dot}</div>
         <div class="cycle-sub">${sub}</div>
       </div>
       <div class="cycle-bar">
@@ -625,6 +786,9 @@
         <span>${statusRight}</span>
       </div>
     `;
+    if (id) {
+      div.addEventListener('click', () => openNoteModal(id, title, sub));
+    }
     return div;
   }
 
@@ -641,6 +805,7 @@
       const daysIn = p.dayInCycle;
       const daysLeft = SYNODIC_MONTH - daysIn;
       container.appendChild(makeCycleBlock({
+        id: 'an-lunacao',
         title: 'Lunação',
         sub: `${SYNODIC_MONTH.toFixed(3)} dias`,
         phase: p.phase,
@@ -664,6 +829,7 @@
       const phase = (dm - 1) / total;
       const monthNames = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
       container.appendChild(makeCycleBlock({
+        id: 'an-mes-greg',
         title: 'Mês gregoriano',
         sub: `${total} dias · ${monthNames[nowDate.getUTCMonth()]}`,
         phase,
@@ -678,6 +844,7 @@
     {
       const p = continuousPhase(NEW_MOON_REF, SYNODIC_MONTH, now);
       container.appendChild(makeCycleBlock({
+        id: 'an-mes-lunar',
         title: 'Mês lunar sinódico',
         sub: `29.53d`,
         phase: p.phase,
@@ -692,6 +859,7 @@
     {
       const p = continuousPhase(J2000, MERCURY, now);
       container.appendChild(makeCycleBlock({
+        id: 'an-mercurio',
         title: 'Ano de Mercúrio',
         sub: `${MERCURY.toFixed(2)} dias`,
         phase: p.phase,
@@ -706,6 +874,7 @@
     {
       const s = solarSeasonPhase(now);
       container.appendChild(makeCycleBlock({
+        id: 'an-estacao',
         title: 'Estação tropical',
         sub: `${s.last} → ${s.next}`,
         phase: s.phase,
@@ -720,6 +889,7 @@
     {
       const p = continuousPhase(J2000, VENUS, now);
       container.appendChild(makeCycleBlock({
+        id: 'an-venus',
         title: 'Ano de Vênus',
         sub: `${VENUS.toFixed(2)} dias`,
         phase: p.phase,
@@ -736,6 +906,7 @@
       const total = daysInYear(nowDate.getUTCFullYear());
       const phase = (doy - 1) / total;
       container.appendChild(makeCycleBlock({
+        id: 'an-ano-greg',
         title: 'Ano gregoriano',
         sub: `${total} dias · ${nowDate.getUTCFullYear()}`,
         phase,
@@ -753,16 +924,22 @@
     container.innerHTML = '';
     const now = nowUTC();
 
-    function needAnchor(title) {
+    function needAnchor(title, id) {
       const div = document.createElement('div');
       div.className = 'cycle-block';
+      if (id) {
+        div.dataset.noteId = id;
+        div.dataset.noteTitle = title;
+      }
+      const dot = id && hasNote(id) ? '<span class="note-dot"></span>' : '';
       div.innerHTML = `
         <div class="cycle-block-header">
-          <div class="cycle-title">${title}</div>
+          <div class="cycle-title">${title}${dot}</div>
           <div class="cycle-sub" style="color:#D85A30;">defina Dia 1 pessoal</div>
         </div>
         <div style="font-size:11px;color:var(--text-mut);">Este ciclo é ancorado no seu Dia 1 pessoal (topo).</div>
       `;
+      if (id) div.addEventListener('click', () => openNoteModal(id, title, 'ancorado no Dia 1 pessoal'));
       return div;
     }
 
@@ -770,6 +947,7 @@
     if (state.anchorDate) {
       const p = plurianualPhase(state.anchorDate, 2, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-bianual',
         title: 'Bi-anual gregoriano',
         sub: '2 anos',
         phase: p.phase,
@@ -778,13 +956,14 @@
         statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 2`,
         statusRight: `${((1-p.phase)*2).toFixed(2)}a restantes`
       }));
-    } else container.appendChild(needAnchor('Bi-anual gregoriano'));
+    } else container.appendChild(needAnchor('Bi-anual gregoriano', 'al-bianual'));
 
     // 2. ANO DE MARTE
     {
       const p = continuousPhase(J2000, MARS, now);
       const years = MARS / TROPICAL_YEAR;
       container.appendChild(makeCycleBlock({
+        id: 'al-marte',
         title: 'Ano de Marte',
         sub: `${MARS.toFixed(1)}d (${years.toFixed(3)}a)`,
         phase: p.phase,
@@ -799,6 +978,7 @@
     if (state.anchorDate) {
       const p = plurianualPhase(state.anchorDate, 3, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-trianual',
         title: 'Tri-anual gregoriano',
         sub: '3 anos',
         phase: p.phase,
@@ -807,12 +987,13 @@
         statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 3`,
         statusRight: `${((1-p.phase)*3).toFixed(2)}a restantes`
       }));
-    } else container.appendChild(needAnchor('Tri-anual gregoriano'));
+    } else container.appendChild(needAnchor('Tri-anual gregoriano', 'al-trianual'));
 
     // 4. PENTA-ANUAL
     if (state.anchorDate) {
       const p = plurianualPhase(state.anchorDate, 5, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-pentaanual',
         title: 'Penta-anual gregoriano',
         sub: '5 anos',
         phase: p.phase,
@@ -821,12 +1002,13 @@
         statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 5`,
         statusRight: `${((1-p.phase)*5).toFixed(2)}a restantes`
       }));
-    } else container.appendChild(needAnchor('Penta-anual gregoriano'));
+    } else container.appendChild(needAnchor('Penta-anual gregoriano', 'al-pentaanual'));
 
     // 5. HEXA-ANUAL
     if (state.anchorDate) {
       const p = plurianualPhase(state.anchorDate, 6, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-hexaanual',
         title: 'Hexa-anual gregoriano',
         sub: '6 anos',
         phase: p.phase,
@@ -835,7 +1017,7 @@
         statusLeft: `<strong>ano ${p.yearsInCycle.toFixed(2)}</strong> / 6`,
         statusRight: `${((1-p.phase)*6).toFixed(2)}a restantes`
       }));
-    } else container.appendChild(needAnchor('Hexa-anual gregoriano'));
+    } else container.appendChild(needAnchor('Hexa-anual gregoriano', 'al-hexaanual'));
 
     // 6. SCHWABE (manchas solares, ~11 anos)
     {
@@ -843,6 +1025,7 @@
       const SCHWABE_REF = Date.UTC(1996, 7, 1);
       const p = continuousPhase(SCHWABE_REF, SCHWABE, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-schwabe',
         title: 'Ciclo de Schwabe (manchas solares)',
         sub: `~11 anos (${SCHWABE.toFixed(0)}d)`,
         phase: p.phase,
@@ -858,6 +1041,7 @@
       const p = continuousPhase(J2000, JUPITER, now);
       const years = JUPITER / TROPICAL_YEAR;
       container.appendChild(makeCycleBlock({
+        id: 'al-jupiter',
         title: 'Ano de Júpiter',
         sub: `${years.toFixed(3)} anos`,
         phase: p.phase,
@@ -874,6 +1058,7 @@
       const SAROS_REF = Date.UTC(1999, 7, 11, 11, 3);
       const p = continuousPhase(SAROS_REF, SAROS, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-saros',
         title: 'Ciclo de Saros',
         sub: `18a 11d 8h (${SAROS.toFixed(1)}d)`,
         phase: p.phase,
@@ -890,6 +1075,7 @@
       const METONIC_REF = Date.UTC(2000, 0, 1);
       const p = continuousPhase(METONIC_REF, METONIC, now);
       container.appendChild(makeCycleBlock({
+        id: 'al-metonico',
         title: 'Ciclo metônico',
         sub: `19 anos ≈ 235 lunações`,
         phase: p.phase,
@@ -905,6 +1091,7 @@
       const p = continuousPhase(J2000, SATURN, now);
       const years = SATURN / TROPICAL_YEAR;
       container.appendChild(makeCycleBlock({
+        id: 'al-saturno',
         title: 'Ano de Saturno',
         sub: `${years.toFixed(3)} anos`,
         phase: p.phase,
@@ -921,6 +1108,7 @@
       const p = continuousPhase(anchorMs, LUNATIONS_1008, now);
       const years = LUNATIONS_1008 / TROPICAL_YEAR;
       container.appendChild(makeCycleBlock({
+        id: 'al-1008',
         title: '1008 lunações',
         sub: `${LUNATIONS_1008.toFixed(0)}d (${years.toFixed(2)}a)`,
         phase: p.phase,
@@ -929,13 +1117,14 @@
         statusLeft: `<strong>lunação ${(p.phase * 1008).toFixed(1)}</strong> / 1008`,
         statusRight: `${((1-p.phase)*years).toFixed(2)}a restantes`
       }));
-    } else container.appendChild(needAnchor('1008 lunações'));
+    } else container.appendChild(needAnchor('1008 lunações', 'al-1008'));
 
     // 12. ANO DE URANO
     {
       const p = continuousPhase(J2000, URANUS, now);
       const years = URANUS / TROPICAL_YEAR;
       container.appendChild(makeCycleBlock({
+        id: 'al-urano',
         title: 'Ano de Urano',
         sub: `${years.toFixed(2)} anos`,
         phase: p.phase,
@@ -947,6 +1136,73 @@
     }
   }
 
+  // ============ MODAL ============
+  const modalBackdrop = document.getElementById('modal-backdrop');
+  const modalTitle = document.getElementById('modal-title');
+  const modalSub = document.getElementById('modal-sub');
+  const modalTextarea = document.getElementById('modal-textarea');
+  const modalStatus = document.getElementById('modal-status');
+  const modalClose = document.getElementById('modal-close');
+  const modalClear = document.getElementById('modal-clear');
+  let currentNoteId = null;
+  let saveTimer = null;
+
+  function openNoteModal(id, title, sub) {
+    currentNoteId = id;
+    modalTitle.textContent = title;
+    modalSub.textContent = sub || '';
+    modalTextarea.value = state.notes[id] || '';
+    modalStatus.textContent = state.notes[id] ? 'Última edição salva' : '';
+    modalBackdrop.classList.add('open');
+    setTimeout(() => modalTextarea.focus(), 100);
+  }
+
+  function closeNoteModal() {
+    if (currentNoteId && saveTimer) {
+      clearTimeout(saveTimer);
+      persistNote();
+    }
+    modalBackdrop.classList.remove('open');
+    currentNoteId = null;
+    refreshNoteIndicators();
+    // Re-render to update dots on continuous blocks
+    if (document.getElementById('panel-anuais').classList.contains('active')) renderAnuais();
+    if (document.getElementById('panel-alem').classList.contains('active')) renderAlem();
+  }
+
+  function persistNote() {
+    if (!currentNoteId) return;
+    const val = modalTextarea.value;
+    if (val.trim().length === 0) {
+      delete state.notes[currentNoteId];
+    } else {
+      state.notes[currentNoteId] = val;
+    }
+    saveState();
+    modalStatus.textContent = 'Salvo · ' + new Date().toLocaleTimeString('pt-BR');
+  }
+
+  modalTextarea.addEventListener('input', () => {
+    modalStatus.textContent = 'Digitando…';
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistNote, 500);
+  });
+
+  modalClose.addEventListener('click', closeNoteModal);
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeNoteModal();
+  });
+  modalClear.addEventListener('click', () => {
+    if (!currentNoteId) return;
+    if (confirm('Apagar a nota deste ciclo?')) {
+      modalTextarea.value = '';
+      persistNote();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalBackdrop.classList.contains('open')) closeNoteModal();
+  });
+
   // ============ INIT ============
   if (state.anchorDate) {
     anchorEl.value = state.anchorDate;
@@ -956,6 +1212,7 @@
   }
   renderAnuais();
   renderAlem();
+  refreshNoteIndicators();
 
   // Auto-refresh continuous cycles every minute
   setInterval(() => {
